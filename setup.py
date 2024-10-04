@@ -86,7 +86,7 @@ class CustomBuildExt(build_ext):
         dest_path = os.path.join(self.build_lib, "diffpy", "pdffit2")
         os.makedirs(dest_path, exist_ok=True)
 
-        for dll_file in glob.glob(os.path.join(bin_path, "*.dll")):
+        for dll_file in glob.glob(os.path.join(bin_path, "gsl*.dll")):
             shutil.copy(dll_file, dest_path)
 
 # ----------------------------------------------------------------------------
