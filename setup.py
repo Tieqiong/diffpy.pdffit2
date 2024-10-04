@@ -12,9 +12,11 @@ import glob
 import os
 import re
 import sys
+import shutil
 import warnings
 
 from setuptools import Extension, setup
+from setuptools.command.build_ext import build_ext
 
 # Use this version when git data are not available, like in git zip archive.
 # Update when tagging a new release.
@@ -63,17 +65,29 @@ def get_gsl_config():
     return rv
 
 def get_gsl_config_win():
-    """Return dictionary with paths to GSL library, windwows version.
-    This version is installed with conda.
-    """
-    conda_prefix = os.environ["CONDA_PREFIX"]
-    inc = os.path.join(conda_prefix, "Library", "include")
-    lib = os.path.join(conda_prefix, "Library", "lib")
-    rv = {"include_dirs": [], "library_dirs": []}
-    rv["include_dirs"] += [inc]
-    rv["library_dirs"] += [lib]
-    return rv
+    """Return dictionary with paths to GSL library on Windows."""
+    gsl_path = os.environ.get("GSL_PATH")
+    if gsl_path:
+        inc = os.path.join(gsl_path, "include")
+        lib = os.path.join(gsl_path, "lib")
+    else:
+        conda_prefix = os.environ.get("CONDA_PREFIX")
+        inc = os.path.join(conda_prefix, "Library", "include")
+        lib = os.path.join(conda_prefix, "Library", "lib")
+    
+    return {"include_dirs": [inc], "library_dirs": [lib]}
 
+class CustomBuildExt(build_ext):
+    def run(self):
+        super().run()
+        gsl_path = os.environ.get("GSL_PATH") or os.path.join(os.environ.get("CONDA_PREFIX", ""), "Library")
+        
+        bin_path = os.path.join(gsl_path, "bin")
+        dest_path = os.path.join(self.build_lib, "diffpy", "pdffit2")
+        os.makedirs(dest_path, exist_ok=True)
+
+        for dll_file in glob.glob(os.path.join(bin_path, "*.dll")):
+            shutil.copy(dll_file, dest_path)
 
 # ----------------------------------------------------------------------------
 
@@ -126,6 +140,7 @@ def create_extensions():
 
 setup_args = dict(
     ext_modules=[],
+    cmdclass={"build_ext": CustomBuildExt},
 )
 
 if __name__ == "__main__":
