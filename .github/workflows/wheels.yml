@@ -67,24 +67,24 @@ jobs:
         with:
           output-dir: wheelhouse
 
+      - name: Install GSL and Set Environment for GSL on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+          cd C:\vcpkg
+          .\bootstrap-vcpkg.bat
+          .\vcpkg integrate install
+          .\vcpkg install gsl gsl:x64-windows
+
       - name: Build wheels for Windows
         if: runner.os == 'Windows'
         uses: pypa/cibuildwheel@v2.21.1
         env:
           CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
-          CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
           CIBW_ENVIRONMENT: |
             GSL_PATH=C:\vcpkg\installed\x64-windows
-          CIBW_BEFORE_BUILD: |
-            IF EXIST "C:\vcpkg" (
-                RMDIR /S /Q "C:\vcpkg"
-            )
-            
-            git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
-            cd C:\vcpkg
-            .\bootstrap-vcpkg.bat
-            .\vcpkg integrate install
-            .\vcpkg install gsl gsl:x64-windows
+          CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
         with:
           output-dir: wheelhouse
 
