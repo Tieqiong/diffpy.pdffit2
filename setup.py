@@ -66,12 +66,12 @@ def get_gsl_config():
 
 def get_gsl_config_win():
     """Return dictionary with paths to GSL library on Windows."""
-    gsl_path = os.environ.get("GSL_PATH")
+    gsl_path = os.environ["GSL_PATH"]
     if gsl_path:
         inc = os.path.join(gsl_path, "include")
         lib = os.path.join(gsl_path, "lib")
     else:
-        conda_prefix = os.environ.get("CONDA_PREFIX")
+        conda_prefix = os.environ["CONDA_PREFIX"]
         inc = os.path.join(conda_prefix, "Library", "include")
         lib = os.path.join(conda_prefix, "Library", "lib")
     
