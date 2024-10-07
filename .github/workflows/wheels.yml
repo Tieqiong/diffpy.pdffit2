@@ -85,9 +85,16 @@ jobs:
             $env:INCLUDE = "$env:GSL_PATH\include;$env:INCLUDE"
             $env:LIB = "$env:GSL_PATH\lib;$env:LIB"
 
-            echo "GSL_PATH=$env:GSL_PATH" >> $env:GITHUB_ENV
-            echo "INCLUDE=$env:INCLUDE" >> $env:GITHUB_ENV
-            echo "LIB=$env:LIB" >> $env:GITHUB_ENV
+            # Debugging: Print the set environment variables
+            Write-Host "GSL_PATH set to: $env:GSL_PATH"
+            Write-Host "INCLUDE set to: $env:INCLUDE"
+            Write-Host "LIB set to: $env:LIB"
+
+            # Verify that gsl_errno.h exists
+            if (-Not (Test-Path "$env:GSL_PATH\include\gsl\gsl_errno.h")) {
+              Write-Error "gsl_errno.h not found at $env:GSL_PATH\include\gsl\gsl_errno.h"
+              exit 1
+            }
         with:
           output-dir: wheelhouse
 

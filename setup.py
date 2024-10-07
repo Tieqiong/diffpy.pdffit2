@@ -66,7 +66,7 @@ def get_gsl_config():
 
 def get_gsl_config_win():
     """Return dictionary with paths to GSL library on Windows."""
-    gsl_path = os.environ["GSL_PATH"]
+    gsl_path = os.environ.get("GSL_PATH")
     if gsl_path:
         inc = os.path.join(gsl_path, "include")
         lib = os.path.join(gsl_path, "lib")
@@ -75,7 +75,13 @@ def get_gsl_config_win():
         inc = os.path.join(conda_prefix, "Library", "include")
         lib = os.path.join(conda_prefix, "Library", "lib")
     
+    if not os.path.isdir(inc):
+        raise FileNotFoundError(f"GSL include directory not found: {inc}")
+    if not os.path.isdir(lib):
+        raise FileNotFoundError(f"GSL library directory not found: {lib}")
+
     return {"include_dirs": [inc], "library_dirs": [lib]}
+
 
 # ----------------------------------------------------------------------------
 
