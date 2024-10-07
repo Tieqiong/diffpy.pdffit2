@@ -85,10 +85,9 @@ jobs:
             $env:INCLUDE = "$env:GSL_PATH\include;$env:INCLUDE"
             $env:LIB = "$env:GSL_PATH\lib;$env:LIB"
 
+            echo "GSL_PATH=$env:GSL_PATH" >> $env:GITHUB_ENV
             echo "INCLUDE=$env:INCLUDE" >> $env:GITHUB_ENV
             echo "LIB=$env:LIB" >> $env:GITHUB_ENV
-            # echo "CONDA_PREFIX=$env:CONDA_PREFIX" >> $env:GITHUB_ENV
-            echo "GSL_PATH=$env:GSL_PATH" >> $env:GITHUB_ENV
         with:
           output-dir: wheelhouse
 
