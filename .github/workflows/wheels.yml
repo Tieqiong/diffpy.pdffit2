@@ -71,7 +71,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: pypa/cibuildwheel@v2.21.1
         env:
-          CIBW_BUILD: ${{ matrix.buildplat }}
+          CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
           CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
           CIBW_BEFORE_BUILD: |
             git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
