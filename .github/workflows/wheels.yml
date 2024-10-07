@@ -80,8 +80,8 @@ jobs:
             .\vcpkg integrate install
             .\vcpkg install gsl gsl:x64-windows
 
-            # Use absolute path
-            $gsl_path = "${env:USERPROFILE}\vcpkg\installed\x64-windows"
+            # Use absolute path based on current directory
+            $gsl_path = "$PWD\vcpkg\installed\x64-windows"
             $env:GSL_PATH = $gsl_path
             $env:INCLUDE = "$gsl_path\include;$env:INCLUDE"
             $env:LIB = "$gsl_path\lib;$env:LIB"
@@ -96,6 +96,13 @@ jobs:
               Write-Error "gsl_errno.h not found at $env:GSL_PATH\include\gsl\gsl_errno.h"
               exit 1
             }
+
+            # Optional: List directories for verification
+            Write-Host "Listing GSL include directory:"
+            Get-ChildItem "$env:GSL_PATH\include\gsl\"
+
+            Write-Host "Listing GSL lib directory:"
+            Get-ChildItem "$env:GSL_PATH\lib\"
         with:
           output-dir: wheelhouse
 
