@@ -71,17 +71,17 @@ jobs:
         if: runner.os == 'Windows'
         uses: pypa/cibuildwheel@v2.21.1
         env:
-          CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
+          CIBW_BUILD: ${{ matrix.buildplat }}
           CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
           CIBW_BEFORE_BUILD: |
-            git clone https://github.com/microsoft/vcpkg.git
-            cd vcpkg
+            git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+            cd C:\vcpkg
             .\bootstrap-vcpkg.bat
             .\vcpkg integrate install
             .\vcpkg install gsl gsl:x64-windows
 
-            # Use absolute path based on current directory
-            $gsl_path = "$PWD\vcpkg\installed\x64-windows"
+            # Set absolute path
+            $gsl_path = "C:\vcpkg\installed\x64-windows"
             $env:GSL_PATH = $gsl_path
             $env:INCLUDE = "$gsl_path\include;$env:INCLUDE"
             $env:LIB = "$gsl_path\lib;$env:LIB"
