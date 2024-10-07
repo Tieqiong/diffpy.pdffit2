@@ -67,27 +67,27 @@ jobs:
         with:
           output-dir: wheelhouse
 
-      - name: Set up conda for Windows
-        if: runner.os == 'Windows'
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          activate-environment: gsl
-          auto-update-conda: true
-          environment-file: environment.yml
-          auto-activate-base: false
-
-      - name: install gsl for Windows
-        if: runner.os == 'Windows'
-        run: |
-          conda config --set always_yes yes --set changeps1 no
-          conda install gsl
-
       - name: Build wheels for Windows
         if: runner.os == 'Windows'
         uses: pypa/cibuildwheel@v2.21.1
         env:
           CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
           CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
+          CIBW_BEFORE_BUILD: |
+            git clone https://github.com/microsoft/vcpkg.git
+            cd vcpkg
+            .\bootstrap-vcpkg.bat
+            .\vcpkg integrate install
+            .\vcpkg install gsl gsl:x64-windows
+
+            $env:GSL_PATH = "${{ github.workspace }}\vcpkg\installed\x64-windows"
+            $env:INCLUDE = "$env:GSL_PATH\include;$env:INCLUDE"
+            $env:LIB = "$env:GSL_PATH\lib;$env:LIB"
+
+            echo "INCLUDE=$env:INCLUDE" >> $env:GITHUB_ENV
+            echo "LIB=$env:LIB" >> $env:GITHUB_ENV
+            # echo "CONDA_PREFIX=$env:CONDA_PREFIX" >> $env:GITHUB_ENV
+            echo "GSL_PATH=$env:GSL_PATH" >> $env:GITHUB_ENV
         with:
           output-dir: wheelhouse
 

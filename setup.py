@@ -77,18 +77,6 @@ def get_gsl_config_win():
     
     return {"include_dirs": [inc], "library_dirs": [lib]}
 
-class CustomBuildExt(build_ext):
-    def run(self):
-        super().run()
-        gsl_path = os.environ.get("GSL_PATH") or os.path.join(os.environ.get("CONDA_PREFIX", ""), "Library")
-        
-        bin_path = os.path.join(gsl_path, "bin")
-        dest_path = os.path.join(self.build_lib, "diffpy", "pdffit2")
-        os.makedirs(dest_path, exist_ok=True)
-
-        for dll_file in glob.glob(os.path.join(bin_path, "gsl*.dll")):
-            shutil.copy(dll_file, dest_path)
-
 # ----------------------------------------------------------------------------
 
 # compile and link options
@@ -140,7 +128,6 @@ def create_extensions():
 
 setup_args = dict(
     ext_modules=[],
-    cmdclass={"build_ext": CustomBuildExt},
 )
 
 if __name__ == "__main__":
