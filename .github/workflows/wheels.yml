@@ -80,10 +80,11 @@ jobs:
             .\vcpkg integrate install
             .\vcpkg install gsl gsl:x64-windows
 
-            $currentDir = (Get-Location).Path
-            $env:GSL_PATH = "$currentDir\vcpkg\installed\x64-windows"
-            $env:INCLUDE = "$env:GSL_PATH\include;$env:INCLUDE"
-            $env:LIB = "$env:GSL_PATH\lib;$env:LIB"
+            # Use absolute path
+            $gsl_path = "${env:USERPROFILE}\vcpkg\installed\x64-windows"
+            $env:GSL_PATH = $gsl_path
+            $env:INCLUDE = "$gsl_path\include;$env:INCLUDE"
+            $env:LIB = "$gsl_path\lib;$env:LIB"
 
             # Debugging: Print the set environment variables
             Write-Host "GSL_PATH set to: $env:GSL_PATH"

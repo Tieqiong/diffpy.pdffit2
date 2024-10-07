@@ -71,9 +71,15 @@ def get_gsl_config_win():
         inc = os.path.join(gsl_path, "include")
         lib = os.path.join(gsl_path, "lib")
     else:
-        conda_prefix = os.environ["CONDA_PREFIX"]
-        inc = os.path.join(conda_prefix, "Library", "include")
-        lib = os.path.join(conda_prefix, "Library", "lib")
+        conda_prefix = os.environ.get("CONDA_PREFIX")
+        if conda_prefix:
+            inc = os.path.join(conda_prefix, "Library", "include")
+            lib = os.path.join(conda_prefix, "Library", "lib")
+        else:
+            raise EnvironmentError(
+                "Neither GSL_PATH nor CONDA_PREFIX environment variables are set. "
+                "Please ensure GSL is installed and GSL_PATH is correctly set."
+            )
     
     if not os.path.isdir(inc):
         raise FileNotFoundError(f"GSL include directory not found: {inc}")
