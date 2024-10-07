@@ -74,6 +74,12 @@ jobs:
           CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
           CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
           CIBW_BEFORE_BUILD: |
+            # Remove existing vcpkg if it exists
+            if (Test-Path "C:\vcpkg") {
+                Remove-Item -Recurse -Force "C:\vcpkg"
+            }
+
+            # Clone vcpkg repository
             git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
             cd C:\vcpkg
             .\bootstrap-vcpkg.bat
