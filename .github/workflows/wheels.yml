@@ -73,41 +73,18 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
           CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
+          CIBW_ENVIRONMENT: |
+            GSL_PATH=C:\vcpkg\installed\x64-windows
           CIBW_BEFORE_BUILD: |
-            REM Remove existing vcpkg if it exists
             IF EXIST "C:\vcpkg" (
                 RMDIR /S /Q "C:\vcpkg"
             )
             
-            REM Clone vcpkg repository
             git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
             cd C:\vcpkg
             .\bootstrap-vcpkg.bat
             .\vcpkg integrate install
             .\vcpkg install gsl gsl:x64-windows
-            
-            REM Set absolute path
-            set "GSL_PATH=C:\vcpkg\installed\x64-windows"
-            set "INCLUDE=%GSL_PATH%\include;%INCLUDE%"
-            set "LIB=%GSL_PATH%\lib;%LIB%"
-            
-            REM Debugging: Print the set environment variables
-            echo GSL_PATH set to: %GSL_PATH%
-            echo INCLUDE set to: %INCLUDE%
-            echo LIB set to: %LIB%
-            
-            REM Verify that gsl_errno.h exists
-            IF NOT EXIST "%GSL_PATH%\include\gsl\gsl_errno.h" (
-                echo gsl_errno.h not found at %GSL_PATH%\include\gsl\gsl_errno.h
-                exit /b 1
-            )
-            
-            REM Optional: List directories for verification
-            echo Listing GSL include directory:
-            dir "%GSL_PATH%\include\gsl\"
-            
-            echo Listing GSL lib directory:
-            dir "%GSL_PATH%\lib\"
         with:
           output-dir: wheelhouse
 
