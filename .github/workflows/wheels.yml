@@ -74,41 +74,40 @@ jobs:
           CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
           CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
           CIBW_BEFORE_BUILD: |
-            # Remove existing vcpkg if it exists
-            if (Test-Path "C:\vcpkg") {
-                Remove-Item -Recurse -Force "C:\vcpkg"
-            }
-
-            # Clone vcpkg repository
+            REM Remove existing vcpkg if it exists
+            IF EXIST "C:\vcpkg" (
+                RMDIR /S /Q "C:\vcpkg"
+            )
+            
+            REM Clone vcpkg repository
             git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
             cd C:\vcpkg
             .\bootstrap-vcpkg.bat
             .\vcpkg integrate install
             .\vcpkg install gsl gsl:x64-windows
-
-            # Set absolute path
-            $gsl_path = "C:\vcpkg\installed\x64-windows"
-            $env:GSL_PATH = $gsl_path
-            $env:INCLUDE = "$gsl_path\include;$env:INCLUDE"
-            $env:LIB = "$gsl_path\lib;$env:LIB"
-
-            # Debugging: Print the set environment variables
-            Write-Host "GSL_PATH set to: $env:GSL_PATH"
-            Write-Host "INCLUDE set to: $env:INCLUDE"
-            Write-Host "LIB set to: $env:LIB"
-
-            # Verify that gsl_errno.h exists
-            if (-Not (Test-Path "$env:GSL_PATH\include\gsl\gsl_errno.h")) {
-              Write-Error "gsl_errno.h not found at $env:GSL_PATH\include\gsl\gsl_errno.h"
-              exit 1
-            }
-
-            # Optional: List directories for verification
-            Write-Host "Listing GSL include directory:"
-            Get-ChildItem "$env:GSL_PATH\include\gsl\"
-
-            Write-Host "Listing GSL lib directory:"
-            Get-ChildItem "$env:GSL_PATH\lib\"
+            
+            REM Set absolute path
+            set "GSL_PATH=C:\vcpkg\installed\x64-windows"
+            set "INCLUDE=%GSL_PATH%\include;%INCLUDE%"
+            set "LIB=%GSL_PATH%\lib;%LIB%"
+            
+            REM Debugging: Print the set environment variables
+            echo GSL_PATH set to: %GSL_PATH%
+            echo INCLUDE set to: %INCLUDE%
+            echo LIB set to: %LIB%
+            
+            REM Verify that gsl_errno.h exists
+            IF NOT EXIST "%GSL_PATH%\include\gsl\gsl_errno.h" (
+                echo gsl_errno.h not found at %GSL_PATH%\include\gsl\gsl_errno.h
+                exit /b 1
+            )
+            
+            REM Optional: List directories for verification
+            echo Listing GSL include directory:
+            dir "%GSL_PATH%\include\gsl\"
+            
+            echo Listing GSL lib directory:
+            dir "%GSL_PATH%\lib\"
         with:
           output-dir: wheelhouse
 
