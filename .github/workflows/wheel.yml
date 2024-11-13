@@ -53,7 +53,15 @@ jobs:
         uses: pypa/cibuildwheel@v2.21.1
         env:
           CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
-          CIBW_BEFORE_BUILD: yum install -y gsl-devel && pip install -e .
+          CIBW_BEFORE_BUILD: |
+            wget https://ftp.gnu.org/gnu/gsl/gsl-2.7.tar.gz
+            tar -xzvf gsl-2.7.tar.gz
+            cd gsl-2.7
+            ./configure
+            make
+            sudo make install
+            sudo ldconfig
+            pip install -e .
         with:
           output-dir: wheelhouse
 
