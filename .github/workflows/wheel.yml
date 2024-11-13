@@ -1,30 +1,29 @@
-name: Build wheels and sdist
+name: Wheel builder
 
 on:
-  push:
+  # workflow_call:
+  #     inputs:
+  #         project:
+  #           description: 'Name of the project to test'
+  #           default: 'PROJECT_NAME'
+  #           required: false
+  #           type: string
+  #         c_extension:
+  #           description: 'Whether the project has a C extension'
+  #           default: false
+  #           required: false
+  #           type: boolean
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build_sdist:
-    name: Build source distribution
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  build_wheels:
 
-      - name: Build sdist
-        run: pipx run build --sdist
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cibw-sdist
-          path: dist/*.tar.gz
-          
-  build-wheels:
-    needs: [build_sdist]
     defaults:
         run:
           shell: bash -l {0}
 
-    name: cibw-wheels-${{ matrix.python[0] }}-${{ matrix.buildplat[0] }}
+    name: Build wheel ${{ matrix.python[0] }}-${{ matrix.buildplat[0] }}
     runs-on: ${{ matrix.buildplat[0] }}
     strategy:
       fail-fast: false
@@ -55,7 +54,7 @@ jobs:
           CIBW_BUILD: ${{ matrix.python[1] }}-${{ matrix.buildplat[1] }}
           CIBW_BEFORE_BUILD: yum install -y gsl-devel && pip install -e .
         with:
-          output-dir: dist
+          output-dir: wheelhouse
 
       - name: Build wheels for macOS
         if: runner.os == 'macOS'
@@ -65,7 +64,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: 13.0
           CIBW_BEFORE_BUILD: brew install gsl && pip install -e .
         with:
-          output-dir: dist
+          output-dir: wheelhouse
 
       - name: Install GSL and Set Environment for GSL on Windows
         if: runner.os == 'Windows'
@@ -86,42 +85,9 @@ jobs:
             GSL_PATH=C:/vcpkg/installed/x64-windows
           CONDA_PREFIX: ${{ env.CONDA_PREFIX }}
         with:
-          output-dir: dist
+          output-dir: wheelhouse
 
-      - name: Upload wheels to GitHub
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[0] }}.whl
-          path: ./dist/*.whl
-
-  pypi-publish:
-    needs: [build-wheels]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: '**/*' # Make sure all files are downloaded, including wheels
-          path: dist
-          merge-multiple: true
-
-      # FIXME: Remove this section
-      - name: List dist files
-        run: ls -la dist # Ensure files are downloaded and in the correct location
-    
-      - name: Setup Python for PyPI upload
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-  
-      - name: Install Twine
-        run: |
-          python -m pip install --upgrade pip
-          pip install twine
-  
-      - name: Publish package to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        # FIXME: Remove Test PyPI
-        run: |
-          twine upload --repository testpypi dist/* --verbose
+          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[0] }}
+          path: ./wheelhouse/*.whl
