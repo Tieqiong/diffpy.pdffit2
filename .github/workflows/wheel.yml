@@ -1,4 +1,3 @@
-
 name: Release (GitHub/PyPI)
 
 on:
@@ -11,7 +10,7 @@ jobs:
   release:
     permissions:
       contents: write
-    uses: bobleesj/release-scripts/.github/workflows/_build-wheel-release-upload.yml@v0
+    uses: Tieqiong/release-scripts/.github/workflows/_build-wheel-release-upload.yml@v0
     with:
       project: diffpy.pdffit2
       c_extension: true
